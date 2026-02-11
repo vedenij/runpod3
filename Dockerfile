@@ -1,6 +1,6 @@
 # Use gonka's custom vLLM image with PoC v2 endpoints support
-# fix7: SM120+ PyTorch fallbacks, dtype cast fix in MoE index_add_
-FROM ghcr.io/vedenij/vllm:v0.9.1-poc-v2-blackwell-fix7
+# fix8: SM120+ PyTorch fallbacks, vectorized dequant matmul (no Python loops)
+FROM ghcr.io/vedenij/vllm:v0.9.1-poc-v2-blackwell-fix8
 
 # Set working directory
 WORKDIR /app
