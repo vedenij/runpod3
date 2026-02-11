@@ -1,7 +1,6 @@
 # Use gonka's custom vLLM image with PoC v2 endpoints support
-# Note: blackwell-fix2 adds pure PyTorch fallbacks for SM120+ (RTX PRO 6000)
-# where both CUTLASS and Triton fail
-FROM ghcr.io/vedenij/vllm:v0.9.1-poc-v2-blackwell-fix3
+# fix5: SM120+ PyTorch fallbacks, copies only 3 modified files (not all .py)
+FROM ghcr.io/vedenij/vllm:v0.9.1-poc-v2-blackwell-fix5
 
 # Set working directory
 WORKDIR /app
