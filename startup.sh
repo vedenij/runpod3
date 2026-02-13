@@ -15,8 +15,8 @@ if [ "$GPU_COUNT" -eq "0" ]; then
     exit 1
 fi
 
-# Calculate tensor parallel size (use all GPUs)
-TP_SIZE=${TENSOR_PARALLEL_SIZE:-$GPU_COUNT}
+# Use actual GPU count (auto-detect)
+TP_SIZE=${GPU_COUNT}
 echo "Tensor Parallel Size: ${TP_SIZE}"
 
 # vLLM server settings
@@ -29,6 +29,7 @@ echo "Port: ${VLLM_PORT}"
 echo "Host: ${VLLM_HOST}"
 
 # Start vLLM server in background (PoC endpoints included in v0.9.1-poc-v2-post2)
+# --load-format runai_streamer: parallel safetensor loading (faster model load)
 /usr/bin/python3.12 -m vllm.entrypoints.openai.api_server \
     --model "${MODEL_NAME}" \
     --host "${VLLM_HOST}" \
@@ -38,6 +39,8 @@ echo "Host: ${VLLM_HOST}"
     --gpu-memory-utilization 0.85 \
     --max-model-len 1025 \
     --enforce-eager \
+    --load-format runai_streamer \
+    --model-loader-extra-config '{"concurrency":16}' \
     2>&1 | tee /tmp/vllm.log &
 
 VLLM_PID=$!

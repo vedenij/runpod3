@@ -599,9 +599,35 @@ def pooled_handler_v2(input_data: Dict) -> Generator[Dict, None, None]:
                     break
                 elif cmd and cmd.get("type") == "switch_job":
                     new_public_key = cmd.get("public_key")
-                    logger.info(f"Received switch_job: {new_public_key[:16] if new_public_key else 'None'}...")
-                    # TODO: implement job switching
-                    yield {"status": "switch_job_not_implemented"}
+                    new_node_count = cmd.get("node_count", node_count)
+                    logger.info(f"switch_job: stopping current generation, switching to pk={new_public_key[:16] if new_public_key else 'None'}...")
+
+                    # Stop current generation
+                    vllm_client.stop()
+
+                    # Restart with new public_key
+                    try:
+                        result = vllm_client.init_generate(
+                            block_hash=block_hash,
+                            block_height=block_height,
+                            public_key=new_public_key,
+                            node_id=node_id,
+                            node_count=new_node_count,
+                            batch_size=batch_size,
+                            callback_url=callback_url,
+                            group_id=group_id,
+                            n_groups=n_groups,
+                        )
+                        public_key = new_public_key
+                        node_count = new_node_count
+                        logger.info(f"switch_job: generation restarted for pk={new_public_key[:16]}..., result={result}")
+                        yield {
+                            "status": "switched_job",
+                            "public_key": new_public_key[:16] + "...",
+                        }
+                    except Exception as e:
+                        logger.error(f"switch_job: failed to restart generation: {e}")
+                        yield {"status": "switch_job_error", "error": str(e)}
 
         except Exception:
             pass
