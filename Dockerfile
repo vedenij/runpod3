@@ -1,4 +1,4 @@
-FROM ghcr.io/vedenij/vllm:v0.16-poc-v2-post4
+FROM ghcr.io/vedenij/vllm:v0.16-poc-v2-post5
 
 # Set working directory
 WORKDIR /app
